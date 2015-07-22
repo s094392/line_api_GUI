@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from line import LineClient
+from line import LineClient, LineBase
 import Tkinter as tk
 
 class Loginwindow:
@@ -23,6 +23,7 @@ class Loginwindow:
         self.username = self.usernameent.get()
         self.password = self.passwordent.get()
         self.client = LineClient(self.username, self.password, is_mac=False, com_name="Linux_line")
+        print self.client.authToken
         self.mainwindow = tk.Toplevel(self.master)
         self.app = MainWindow(self.mainwindow, self.client)
 
@@ -31,7 +32,6 @@ class MainWindow:
     def __init__(self, master, client):
         self.master = master
         self.client = client
-        # self.profile = [tk.StringVar().set(self.client.profile.id), tk.StringVar().set(self.client.profile.name), tk.StringVar().set(self.client.profile.statusMessage)]
         self.profile_id = tk.StringVar()
         self.profile_id.set(self.client.profile.id)
         self.profile_name = tk.StringVar()
@@ -46,6 +46,38 @@ class MainWindow:
         self.linename.pack()
         self.linestatusMessage.pack()
         self.frame.pack()
+        self.contacts = []
+
+        for i in range(len(self.client.contacts)):
+            contact_name = tk.StringVar()
+            contact_name.set(self.client.contacts[i].name)
+            self.contacts.append(tk.Button(self.frame, textvariable = contact_name, command = lambda i=i:self.gochat(i)).pack())
+
+    def gochat(self, num):
+        self.chatwindow = tk.Toplevel(self.master)
+        self.app = Chatroom(self.chatwindow, num, self.client)
+
+class Chatroom:
+    def __init__(self, master, num, client):
+        self.master = master
+        self.frame = tk.Frame(master)
+        self.client = client
+        # self.frame.title(self.client.contact[num].name)
+        self.chatroomname = tk.StringVar()
+        self.chatroomname.set(self.client.contacts[num].name)
+        self.chatroomnamelbl = tk.Label(self.frame, textvariable=self.chatroomname)
+        self.inputboxent = tk.Entry(self.frame)
+        def _wrapper():
+            self.submitMessage(self.inputboxent.get(), num)
+            self.inputboxent.delete(0, 'end')
+        self.submitbtn = tk.Button(self.frame, text="Submit", command=_wrapper)
+        self.chatroomnamelbl.pack()
+        self.inputboxent.pack()
+        self.submitbtn.pack()
+        self.frame.pack()
+
+    def submitMessage(self, message, id):
+        self.client.contacts[id].sendMessage(message)
 
 def main():
     root = tk.Tk()
