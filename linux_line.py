@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # encoding: utf-8
 
 from line import LineClient, LineBase
 import Tkinter as tk
+import ScrolledText as tkst
 
 class Loginwindow:
     def __init__(self, master):
@@ -66,12 +67,18 @@ class Chatroom:
         self.chatroomname = tk.StringVar()
         self.chatroomname.set(self.client.contacts[num].name)
         self.chatroomnamelbl = tk.Label(self.frame, textvariable=self.chatroomname)
+        self.chatst = tkst.ScrolledText(master=self.frame, wrap=tk.WORD, width = 30, height = 30)
         self.inputboxent = tk.Entry(self.frame)
         def _wrapper():
-            self.submitMessage(self.inputboxent.get(), num)
-            self.inputboxent.delete(0, 'end')
+            if self.inputboxent.get():
+                self.message = self.inputboxent.get()
+                self.submitMessage(self.message, num)
+                self.chatst.insert(tk.INSERT, "%s : %s \n" % (self.client.profile.name, self.message))
+                self.chatst.yview(tk.END)
+                self.inputboxent.delete(0, 'end')
         self.submitbtn = tk.Button(self.frame, text="Submit", command=_wrapper)
         self.chatroomnamelbl.pack()
+        self.chatst.pack()
         self.inputboxent.pack()
         self.submitbtn.pack()
         self.frame.pack()
@@ -88,34 +95,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-# testt = Label(root, textvariable=profile)
-# def UserLogin():
-    # username = usernameent.get()
-    # password = Passwordent.get()
-    # client = LineClient(username, password, is_mac=False, com_name="Linux_line")
-    # profile.set(client.profile)
-    # MainWindow()
-    # # profile = client.profile
-
-# def MainWindow():
-    # main = Tk()
-    # main.title("Line")
-    # line_name = Label(main, textvariable=profile).pack()
-    # main.mainloop()
-
-# usernamelbl = Label(root, text="UserName:")
-# passwordlbl = Label(root, text="Password:")
-
-# usernameent = Entry(root)
-# Passwordent = Entry(root)
-
-# loginbtn = Button(root, text="Login", command=UserLogin)
-
-# usernamelbl.pack()
-# usernameent.pack()
-# passwordlbl.pack()
-# Passwordent.pack()
-# loginbtn.pack()
-# testt.pack()
-
-# root.mainloop()
